@@ -1,24 +1,25 @@
 const AWS = require('aws-sdk');
-const dynamodb = new AWS.DynamoDB({region: 'us-west-1', apiVersion: '2012-08-10'});
 
-exports.main = async function(event, context) {
+//  Look into whether this is good practice.
+const dynamodb = new AWS.DynamoDB({ region: 'us-west-1', apiVersion: '2012-08-10' });
+
+
+exports.main = async function (event, context) {
   b = JSON.parse(event.body);
-  console.log(b);
-  try {
-    const params = {
-      Item: {
-          "UserId": { S: "user_" + Math.random() },
-          "Age":    { N: b.age },
-          "Height": { N: b.height },
-          "Income": { N: b.income }
-      },
-      TableName: "compare-yourself"
+  const params = {
+    Item: {
+      "UserId": { S: "user_" + Math.random() },
+      "Age": { N: b.age },
+      "Height": { N: b.height },
+      "Income": { N: b.income }
+    },
+    TableName: "compare-yourself"
   };
   console.log(params);
-  
-  dynamodb.putItem(params, function(err, data) {
-    console.log(data);
-    console.log(err);
+
+  return await dynamodb.putItem(params, function (err, data) {
+    console.log(JSON.stringify(data));
+    console.log(JSON.stringify(err));
     if (err) {
       return {
         statusCode: 400,
@@ -29,18 +30,9 @@ exports.main = async function(event, context) {
       return {
         statusCode: 200,
         headers: {},
-        body: data
+        body: "DB success!"
       }
     }
-  });
-
-  } catch(error) {
-    var body = error.stack || JSON.stringify(error, null, 2);
-    console.log(body);
-    return {
-      statusCode: 400,
-        headers: {},
-        body: JSON.stringify(body)
-    }
-  }
+  }).promise();
+  console.log("Done with putItem");
 }
