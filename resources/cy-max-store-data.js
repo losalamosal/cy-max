@@ -34,5 +34,4 @@ exports.main = async function (event, context) {
       }
     }
   }).promise();
-  console.log("Done with putItem");
 }
