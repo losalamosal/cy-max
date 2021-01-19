@@ -4,7 +4,8 @@ const { DynamoDB } = require('aws-sdk');
 const dynamodb = new DynamoDB({ region: 'us-west-1', apiVersion: '2012-08-10' });
 
 exports.main = async (event, context) => {
-  console.log(JSON.stringify(event.body, null, '  '));
+  console.log(JSON.stringify(context, null, '  '));
+  console.log(JSON.stringify(event, null, '  '));
   const b = JSON.parse(event.body);
   console.log(JSON.stringify(b, null, '  '));
   const params = {
@@ -14,7 +15,7 @@ exports.main = async (event, context) => {
       "Height": { N: b.height },
       "Income": { N: b.income }
     },
-    ReturnConsumedCapacity: "TOTAL",
+    ReturnConsumedCapacity: "TOTAL",    // so we have something besides {} body
     TableName: "compare-yourself"
   };
   console.log(params);
@@ -24,13 +25,13 @@ exports.main = async (event, context) => {
     console.log(result);
     return {
       statusCode: 200,
-      headers: { 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': 'text/plain' },   // return CORS headers here?
       body: JSON.stringify(result, null, '  ')
     };
   } catch(err) {
     return {
       statusCode: err.statusCode || 501,
-      headers: { 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': 'text/plain' },   // return CORS headers here?
       body: err
     };
   }
@@ -52,3 +53,18 @@ exports.main = async (event, context) => {
     }
   }); */
 };
+
+// How do errors propogate?
+/* module.exports.index = async (event, context) => {
+	const queryRes = await ddb.query(...).promise();
+	const putRes = await s3.putObject(...).promise();
+	return ddb.putItem(...).promise();
+}
+
+module.exports.index = async (event, context) => {
+	// The two *independent* queries run concurrently
+	const [query1Res, query2Res] = await Promise.all([
+		ddb.query(...).promise(),
+		ddb.query(...).promise()
+	]);
+} */
